@@ -1,33 +1,30 @@
 name: HTB Speedrun Runner
 
 on:
-  # GitHub interfeysidan qo'lda ishga tushirish uchun
-  workflow_dispatch:
+  workflow_dispatch: # Faqat qo'lda ishga tushirish uchun
 
 jobs:
   solve-challenge:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Kodlarni yuklab olish
+      - name: 📂 Kodlarni yuklab olish
         uses: actions/checkout@v4
 
-      - name: Python 3.10 o'rnatish
+      - name: 🐍 Python 3.10 o'rnatish
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Tizim kutubxonalarini yangilash
-        # Pwntools ba'zan qo'shimcha paketlarni talab qiladi
+      - name: ⚙️ Tizim kutubxonalarini sozlash
         run: |
           sudo apt-get update
           sudo apt-get install -y libssl-dev libffi-dev build-essential
 
-      - name: Pwntools o'rnatish
+      - name: 📦 Pwntools o'rnatish
         run: |
           python -m pip install --upgrade pip
           pip install pwntools
 
-      - name: Speedrun Exploitni ishga tushirish
-        # Bu buyruq exploit.py faylini yurgizadi
+      - name: 🚀 Speedrun Exploitni ishga tushirish
         run: python exploit.py
