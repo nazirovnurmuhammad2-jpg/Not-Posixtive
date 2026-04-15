@@ -1,42 +1,37 @@
 from pwn import *
+import os
 
-# 1. Serverga ulanish parametrlarini kiriting
+# Server ma'lumotlarini o'zgartiring
 HOST = '154.57.164.67'  # HTB bergan IP
 PORT = 32054              # HTB bergan Port
 
-try:
-    # Serverga ulanamiz
-    r = remote(HOST, PORT)
+def solve():
+    try:
+        r = remote(HOST, PORT)
+        
+        while True:
+            line = r.recvline().decode().strip()
+            if not line: continue
+            
+            print(f"Serverdan keldi: {line}")
 
-    # Odatda boshida biron bir matn chiqadi (masalan, "Ready? Press Enter")
-    # r.recvuntil(b"Enter")
-    # r.sendline(b"")
+            if "HTB{" in line:
+                print(f"TABRIKLAYMAN! Flag: {line}")
+                return
 
-    while True:
-        # 2. Savolni qabul qilish
-        # 'recvline' yoki 'recvuntil' orqali savol turgan qatorni ushlaymiz
-        line = r.recvline().decode().strip()
-        print(f"Serverdan keldi: {line}")
-
-        # Agar "flag" so'zi ko'rinsa, siklni to'xtatamiz
-        if "HTB{" in line:
-            print(f"TABRIKLAYMAN! Flag: {line}")
-            break
-
-        # 3. Logika (Matematika yoki Matnni qayta ishlash)
-        # Misol: Server "5 + 10 = ?" ko'rinishida savol bersa:
-        try:
-            # Faqat misol qismini ajratib olamiz
-            # Bu joyni challange turiga qarab o'zgartirasiz
             if "=" in line:
-                problem = line.split('=')[0]
-                result = eval(problem) # Matematik amalni bajarish
+                # Misol: "5 + 10 = ?" -> problem = "5 + 10"
+                problem = line.split('=')[0].strip()
+                # Xavfsizroq hisoblash uchun eval ishlatamiz
+                result = eval(problem)
                 
-                # 4. Javobni yuborish
                 r.sendline(str(result).encode())
                 print(f"Yuborilgan javob: {result}")
-        except:
-            continue
+                
+    except EOFError:
+        print("Server ulanishni uzdi.")
+    except Exception as e:
+        print(f"Xato yuz berdi: {e}")
 
-except EOFError:
-    print("Server ulanishni uzdi.")
+if __name__ == "__main__":
+    solve()
