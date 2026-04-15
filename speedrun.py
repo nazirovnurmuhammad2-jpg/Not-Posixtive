@@ -1,37 +1,58 @@
 from pwn import *
-import os
+import re
 
-# Server ma'lumotlarini o'zgartiring
-HOST = '154.57.164.67'  # HTB bergan IP
-PORT = 32054              # HTB bergan Port
+# --- SOZLAMALAR ---
+HOST = '154.57.164.67'  # HTB bergan IP manzilni bura yozing
+PORT = 32054         # HTB bergan Portni bura yozing
+# ------------------
 
 def solve():
     try:
-        r = remote(HOST, PORT)
-        
+        # Serverga ulanish
+        io = remote(HOST, PORT)
+        print(f"[+] Serverga ulandi: {HOST}:{PORT}")
+
         while True:
-            line = r.recvline().decode().strip()
-            if not line: continue
+            # Serverdan kelgan ma'lumotni o'qish
+            try:
+                data = io.recvline().decode().strip()
+            except EOFError:
+                print("[!] Server ulanishni uzdi (Ehtimol flag yuborildi).")
+                break
+
+            if not data:
+                continue
+
+            print(f"[*] Kelgan matn: {data}")
+
+            # 1. Flagni tekshirish
+            if "HTB{" in data:
+                print(f"\n[!!!] FLAG TOPILDI: {data}\n")
+                break
+
+            # 2. Matematik amalni qidirish (RegEx orqali)
+            # Bu qator: raqam + belgi + raqam formatini qidiradi
+            match = re.search(r'(\d+[\s\+\-\*\/]+\d+)', data)
             
-            print(f"Serverdan keldi: {line}")
-
-            if "HTB{" in line:
-                print(f"TABRIKLAYMAN! Flag: {line}")
-                return
-
-            if "=" in line:
-                # Misol: "5 + 10 = ?" -> problem = "5 + 10"
-                problem = line.split('=')[0].strip()
-                # Xavfsizroq hisoblash uchun eval ishlatamiz
-                result = eval(problem)
-                
-                r.sendline(str(result).encode())
-                print(f"Yuborilgan javob: {result}")
-                
-    except EOFError:
-        print("Server ulanishni uzdi.")
+            if match:
+                expression = match.group(1)
+                try:
+                    # Misolni hisoblash
+                    result = eval(expression)
+                    # Javobni yuborish
+                    io.sendline(str(result).encode())
+                    print(f"[>] Yuborilgan javob: {result}")
+                except Exception as e:
+                    print(f"[X] Hisoblashda xato: {e}")
+            
     except Exception as e:
-        print(f"Xato yuz berdi: {e}")
+        print(f"[X] Ulanishda xato: {e}")
+    finally:
+        # Oxirida terminalni ochiq qoldirish (agar flag kelsa ko'rish uchun)
+        try:
+            io.interactive()
+        except:
+            pass
 
 if __name__ == "__main__":
     solve()
