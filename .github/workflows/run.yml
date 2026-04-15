@@ -1,8 +1,7 @@
 name: HTB Speedrun Automator
 
 on:
-  # workflow_dispatch tugmasi orqali qo'lda ishga tushirish imkonini beradi
-  workflow_dispatch:
+  workflow_dispatch: # Qo'lda ishga tushirish uchun
 
 jobs:
   run-exploit:
@@ -23,5 +22,5 @@ jobs:
           pip install pwntools
 
       - name: Skriptni ishga tushirish
-        # exploit.py fayli sizning asosiy kodingiz bo'lishi kerak
+        # exploit.py fayli loyihangizning asosiy papkasida bo'lishi shart
         run: python exploit.py
